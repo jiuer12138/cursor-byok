@@ -43,20 +43,23 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Build macOS release (arm64 only)
         run: |
+          set -euxo pipefail
           export PATH="$HOME/go/bin:$PATH"
-          # 只构建 macOS（跳过 Linux/Windows，避免 Docker 依赖）
-          task release:clean
-          task release:ensure:dir
-          task release:notes
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_DIR="bin/release/$VERSION"
+          mkdir -p "$RELEASE_DIR"
+          # 构建 macOS arm64 归档（task 的 internal 步骤在 CI 中会被跳过，改用等效命令）
           task release:build:macos:arm64
+          # 生成 release notes
+          echo "cursorbyok fork auto build $VERSION" > "$RELEASE_DIR/.release-notes.md"
           # 生成 update.json（只含 macos-arm64，URL 指向本 fork）
           go run ./scripts/release manifest \
             -config ./build/config.yml \
-            -assets-dir "bin/release/${{ steps.version.outputs.version }}" \
-            -out "bin/release/${{ steps.version.outputs.version }}/update.json" \
+            -assets-dir "$RELEASE_DIR" \
+            -out "$RELEASE_DIR/update.json" \
             -repo "jiuer12138/cursor-byok" \
             -base-name "cursor-byok" \
-            -notes "bin/release/${{ steps.version.outputs.version }}/.release-notes.md" \
+            -notes "$RELEASE_DIR/.release-notes.md" \
             -platforms "macos-arm64"
       - name: Verify artifacts
         run: |
