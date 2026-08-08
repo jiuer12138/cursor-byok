@@ -36,20 +36,33 @@ jobs:
         run: |
           cd frontend
           npm install
-      - name: Build release
-        run: |
-          export PATH="$HOME/go/bin:$PATH"
-          task release:prepare:darwin
-      - name: Verify artifacts
-        run: |
-          ls -la bin/release/*/ 2>/dev/null || (echo "no release dir"; exit 1)
-          test -f bin/release/*/update.json && echo "OK update.json"
-          test -f bin/release/*/cursor-byok-*-macos-arm64.tar.gz && echo "OK macos-arm64"
       - name: Get version
         id: version
         run: |
           VERSION=$(go run ./scripts/release version -config ./build/config.yml)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Build macOS release (arm64 only)
+        run: |
+          export PATH="$HOME/go/bin:$PATH"
+          # 只构建 macOS（跳过 Linux/Windows，避免 Docker 依赖）
+          task release:clean
+          task release:ensure:dir
+          task release:notes
+          task release:build:macos:arm64
+          # 生成 update.json（只含 macos-arm64，URL 指向本 fork）
+          go run ./scripts/release manifest \
+            -config ./build/config.yml \
+            -assets-dir "bin/release/${{ steps.version.outputs.version }}" \
+            -out "bin/release/${{ steps.version.outputs.version }}/update.json" \
+            -repo "jiuer12138/cursor-byok" \
+            -base-name "cursor-byok" \
+            -notes "bin/release/${{ steps.version.outputs.version }}/.release-notes.md" \
+            -platforms "macos-arm64"
+      - name: Verify artifacts
+        run: |
+          ls -la bin/release/*/ 2>/dev/null || (echo "no release dir"; exit 1)
+          test -f bin/release/*/update.json && echo "OK update.json"
+          test -f bin/release/*/cursor-byok-*-macos-arm64.tar.gz && echo "OK macos-arm64"
       - name: Release notes
         id: notes
         run: |

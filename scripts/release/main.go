@@ -113,6 +113,7 @@ func runManifest(args []string) {
 	repo := flags.String("repo", "", "GitHub repo in owner/repo form")
 	baseName := flags.String("base-name", "cursor-byok", "release asset basename")
 	notesPath := flags.String("notes", "", "release notes file")
+	platforms := flags.String("platforms", "", "comma-separated platforms to include (default all: macos-arm64,macos-amd64,windows-amd64,linux-amd64)")
 	_ = flags.Parse(args)
 
 	if strings.TrimSpace(*assetsDir) == "" {
@@ -146,7 +147,16 @@ func runManifest(args []string) {
 		Mandatory:    false,
 	}
 
+	allowed := map[string]bool{}
+	if *platforms != "" {
+		for _, p := range strings.Split(*platforms, ",") {
+			allowed[strings.TrimSpace(p)] = true
+		}
+	}
 	for _, spec := range releaseAssets {
+		if len(allowed) > 0 && !allowed[spec.platform] {
+			continue
+		}
 		filename := fmt.Sprintf("%s-%s-%s%s", *baseName, version, spec.platform, spec.suffix)
 		fullpath := filepath.Join(*assetsDir, filename)
 		asset, err := buildManifestAsset(fullpath, *repo, version, filename)
