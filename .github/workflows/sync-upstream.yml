@@ -1,0 +1,40 @@
+name: Sync upstream leookun
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/leookun/cursor-byok.git
+          git fetch upstream main
+      - name: Check behind
+        id: check
+        run: |
+          BEHIND=$(git rev-list --count HEAD..upstream/main || echo 0)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+      - name: Merge upstream (keep fork)
+        if: steps.check.outputs.behind != '0'
+        run: |
+          git merge upstream/main --no-edit -X ours || git merge --abort
+          sed -i 's/leookun\/cursor-byok/jiuer12138\/cursor-byok/g' internal/buildinfo/buildinfo.go Taskfile.yml
+          git add -A
+          git commit -m "chore: sync upstream leookun (auto)" --allow-empty || true
+      - name: Push
+        if: steps.check.outputs.behind != '0'
+        run: git push origin main

@@ -1,0 +1,70 @@
+name: Build & Release macOS app
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos-arm64:
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install protoc
+        run: brew install protobuf
+      - name: Install wails3 + task
+        run: |
+          go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+          go install github.com/go-task/task/v3/cmd/task@latest
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+      - name: Install frontend deps
+        run: |
+          cd frontend
+          npm install
+      - name: Build release
+        run: |
+          export PATH="$HOME/go/bin:$PATH"
+          task release:prepare:darwin
+      - name: Verify artifacts
+        run: |
+          ls -la bin/release/*/ 2>/dev/null || (echo "no release dir"; exit 1)
+          test -f bin/release/*/update.json && echo "OK update.json"
+          test -f bin/release/*/cursor-byok-*-macos-arm64.tar.gz && echo "OK macos-arm64"
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(go run ./scripts/release version -config ./build/config.yml)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Release notes
+        id: notes
+        run: |
+          NOTES="bin/release/${{ steps.version.outputs.version }}/.release-notes.md"
+          if [ -f "$NOTES" ]; then cat "$NOTES" > /tmp/notes.md; else echo "cursorbyok fork auto build ${{ steps.version.outputs.version }}" > /tmp/notes.md; fi
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: cursorbyok v${{ steps.version.outputs.version }}
+          body_path: /tmp/notes.md
+          files: |
+            bin/release/*/update.json
+            bin/release/*/cursor-byok-*-macos-arm64.tar.gz
+            bin/release/*/cursor-byok-*-macos-amd64.tar.gz
+          fail_on_unmatched_files: false
+          draft: false
+          prerelease: false
