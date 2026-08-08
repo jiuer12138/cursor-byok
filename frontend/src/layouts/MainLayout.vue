@@ -11,7 +11,7 @@ import {
   updateViewState,
 } from "@/state/appState";
 import { isWindows } from "@/utils/isWindows";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import Logo from "@/assets/logo.png";
 

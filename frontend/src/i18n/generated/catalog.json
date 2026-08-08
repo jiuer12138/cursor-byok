@@ -257,7 +257,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 173,
+          "line": 197,
           "column": 14
         }
       ]
@@ -378,7 +378,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 74,
+          "line": 98,
           "column": 17
         },
         {
@@ -594,17 +594,17 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 71,
+          "line": 95,
           "column": 12
         },
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 73,
+          "line": 97,
           "column": 18
         },
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 164,
+          "line": 188,
           "column": 1
         }
       ]
@@ -662,7 +662,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 37,
+          "line": 61,
           "column": 10
         }
       ]
@@ -900,7 +900,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 49,
+          "line": 73,
           "column": 21
         }
       ]
@@ -1136,7 +1136,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 173,
+          "line": 197,
           "column": 14
         }
       ]
@@ -1177,12 +1177,12 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 41,
+          "line": 65,
           "column": 34
         },
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 41,
+          "line": 65,
           "column": 52
         },
         {
@@ -1499,7 +1499,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 111,
+          "line": 135,
           "column": 56
         }
       ]
@@ -2343,7 +2343,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 72,
+          "line": 96,
           "column": 14
         }
       ]
@@ -2391,7 +2391,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 83,
+          "line": 107,
           "column": 21
         }
       ]
@@ -2497,7 +2497,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 36,
+          "line": 60,
           "column": 42
         }
       ]
@@ -2608,7 +2608,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 146,
+          "line": 170,
           "column": 1
         }
       ]
@@ -2784,7 +2784,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 62,
+          "line": 86,
           "column": 21
         }
       ]
@@ -2796,7 +2796,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 122,
+          "line": 146,
           "column": 20
         }
       ]
@@ -2808,7 +2808,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 149,
+          "line": 173,
           "column": 1
         }
       ]
@@ -2844,7 +2844,7 @@
       "refs": [
         {
           "file": "src/components/CursorAccountCard.vue",
-          "line": 35,
+          "line": 59,
           "column": 43
         }
       ]
@@ -3021,6 +3021,18 @@
         {
           "file": "src/components/ModelEditor.vue",
           "line": 582,
+          "column": 21
+        }
+      ]
+    },
+    "f526ab6eff33039a": {
+      "source": "打开作者地址失败",
+      "kind": "text",
+      "placeholders": 0,
+      "refs": [
+        {
+          "file": "src/layouts/MainLayout.vue",
+          "line": 96,
           "column": 21
         }
       ]
