@@ -1,0 +1,16 @@
+# CI 专用 Taskfile：macos-arm64 单平台打包（避免 docker linux 构建）
+# 用法: task -t ci-macos.Taskfile.yml release:macos:arm64
+version: "3"
+
+includes:
+  root: ./Taskfile.yml
+
+tasks:
+  release:macos:arm64:
+    summary: 构建 macos-arm64 发布资产并生成 update.json（CI 专用）
+    cmds:
+      - task: root:release:clean
+      - task: root:common:update:build-assets
+      - task: root:release:notes
+      - task: root:release:build:macos:arm64
+      - task: root:release:manifest

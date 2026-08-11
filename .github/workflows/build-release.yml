@@ -43,11 +43,7 @@ jobs:
       - name: Build release (macos-arm64 only)
         run: |
           export PATH="$HOME/go/bin:$PATH"
-          task release:clean
-          task common:update:build-assets
-          task release:notes
-          task release:build:macos:arm64
-          task release:manifest
+          task -t ci-macos.Taskfile.yml release:macos:arm64
       - name: Verify artifacts
         run: |
           ls -la bin/release/*/ 2>/dev/null || (echo "no release dir"; exit 1)
