@@ -25,8 +25,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install protoc
-        run: brew install protobuf
+      - name: Install protoc + go plugins
+        run: |
+          brew install protobuf
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install connectrpc.com/connect/cmd/protoc-gen-connect-go@latest
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
       - name: Install wails3 + task
         run: |
           go install github.com/wailsapp/wails/v3/cmd/wails3@latest
