@@ -2,6 +2,11 @@
 
 # cursor-byok
 
+cursor-byok 是 Cursor 后端的本地实现。
+<br>
+<br>
+<a href="https://trendshift.io/repositories/39260?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-39260" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/39260" alt="leookun/cursor-byok | Trendshift" width="250" height="55" /></a>
+
 [使用教程](https://docs.leokun.cn) · [下载最新版](https://github.com/leookun/cursor-byok/releases/latest) · [问题反馈](https://github.com/leookun/cursor-byok/issues) · [English](./README.md)
 
 [![Release](https://img.shields.io/github/v/release/leookun/cursor-byok?style=flat-square)](https://github.com/leookun/cursor-byok/releases/latest)
@@ -84,11 +89,18 @@ cursor-byok 在本机负责协议适配、模型请求转发、工具调用衔�
 - [Telegram 交流群](https://t.me/cursor_byok)
 - QQ 交流群：`1095916242`、`1094411438`、`1095918002`、`1094419321`
 
-<a href="https://trendshift.io/repositories/39260?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-39260" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/39260" alt="leookun/cursor-byok | Trendshift" width="250" height="55" /></a>
 
 ## 开发与贡献
 
 欢迎提交 Issue 和 Pull Request。开发环境、构建命令、项目结构及提交规范请阅读 [贡献指南](./CONTRIBUTING.md)。
+
+
+## 贡献者名单
+
+<a href="https://github.com/leookun/cursor-byok/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=leookun/cursor-byok" />
+</a>
+
 
 ## 许可证
 
