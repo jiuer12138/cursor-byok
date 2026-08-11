@@ -151,6 +151,11 @@ func runManifest(args []string) {
 		fullpath := filepath.Join(*assetsDir, filename)
 		asset, err := buildManifestAsset(fullpath, *repo, version, filename)
 		if err != nil {
+			if os.IsNotExist(err) {
+				// 单平台构建：跳过缺失平台，不报错
+				fmt.Fprintf(os.Stderr, "skip missing asset: %s\n", filename)
+				continue
+			}
 			exitErr(err)
 		}
 		manifest.Platforms[spec.platform] = asset
