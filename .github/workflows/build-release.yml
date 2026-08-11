@@ -40,10 +40,14 @@ jobs:
         run: |
           cd frontend
           npm install
-      - name: Build release
+      - name: Build release (macos-arm64 only)
         run: |
           export PATH="$HOME/go/bin:$PATH"
-          task release:prepare:darwin
+          task release:clean
+          task common:update:build-assets
+          task release:notes
+          task release:build:macos:arm64
+          task release:manifest
       - name: Verify artifacts
         run: |
           ls -la bin/release/*/ 2>/dev/null || (echo "no release dir"; exit 1)
@@ -68,7 +72,6 @@ jobs:
           files: |
             bin/release/*/update.json
             bin/release/*/cursor-byok-*-macos-arm64.tar.gz
-            bin/release/*/cursor-byok-*-macos-amd64.tar.gz
           fail_on_unmatched_files: false
           draft: false
           prerelease: false
