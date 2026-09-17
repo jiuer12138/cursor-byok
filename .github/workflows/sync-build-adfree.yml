@@ -69,6 +69,10 @@ jobs:
           UPSTREAM_SHA: ${{ steps.upstream.outputs.upstream_sha }}
         run: |
           git read-tree --reset -u upstream/main
+          # The fork owns its workflow files; GITHUB_TOKEN cannot import upstream workflows.
+          if [[ -d .github/workflows ]]; then
+            rm -r .github/workflows
+          fi
           mkdir -p .github/fork .github/workflows
           cp -R "${RUNNER_TEMP}/fork-automation/fork/." .github/fork/
           cp "${RUNNER_TEMP}/fork-automation/sync-build-adfree.yml" .github/workflows/sync-build-adfree.yml
