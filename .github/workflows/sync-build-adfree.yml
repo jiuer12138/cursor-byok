@@ -1,0 +1,145 @@
+name: Sync upstream and build ad-free macOS
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: Build even when upstream has not changed
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/fork/**"
+      - ".github/workflows/sync-build-adfree.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-build-adfree
+  cancel-in-progress: false
+
+jobs:
+  sync-build:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Save fork automation
+        run: |
+          mkdir -p "${RUNNER_TEMP}/fork-automation"
+          cp -R .github/fork "${RUNNER_TEMP}/fork-automation/fork"
+          cp .github/workflows/sync-build-adfree.yml "${RUNNER_TEMP}/fork-automation/sync-build-adfree.yml"
+
+      - name: Fetch upstream and decide whether to build
+        id: upstream
+        env:
+          FORCE_BUILD: ${{ inputs.force_build || false }}
+        run: |
+          git remote add upstream https://github.com/leookun/cursor-byok.git 2>/dev/null || \
+            git remote set-url upstream https://github.com/leookun/cursor-byok.git
+          git fetch --no-tags upstream main
+          upstream_sha=$(git rev-parse upstream/main)
+          previous_sha=$(tr -d '[:space:]' < .github/fork/upstream-sha)
+          has_update=false
+          if [[ "${upstream_sha}" != "${previous_sha}" ]]; then
+            has_update=true
+          fi
+          should_build="${has_update}"
+          if [[ "${FORCE_BUILD}" = "true" ]]; then
+            should_build=true
+          fi
+          echo "old_sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+          echo "upstream_sha=${upstream_sha}" >> "${GITHUB_OUTPUT}"
+          echo "has_update=${has_update}" >> "${GITHUB_OUTPUT}"
+          echo "should_build=${should_build}" >> "${GITHUB_OUTPUT}"
+
+      - name: Rebuild source from upstream plus fork customization
+        if: steps.upstream.outputs.has_update == 'true'
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.upstream_sha }}
+        run: |
+          git read-tree --reset -u upstream/main
+          mkdir -p .github/fork .github/workflows
+          cp -R "${RUNNER_TEMP}/fork-automation/fork/." .github/fork/
+          cp "${RUNNER_TEMP}/fork-automation/sync-build-adfree.yml" .github/workflows/sync-build-adfree.yml
+          node .github/fork/apply-ad-free.mjs
+          printf '%s\n' "${UPSTREAM_SHA}" > .github/fork/upstream-sha
+
+      - uses: actions/setup-node@v4
+        if: steps.upstream.outputs.should_build == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.upstream.outputs.should_build == 'true'
+        with:
+          targets: aarch64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+        if: steps.upstream.outputs.should_build == 'true'
+        with:
+          workspaces: ". -> target"
+
+      - name: Install and validate frontend
+        if: steps.upstream.outputs.should_build == 'true'
+        working-directory: apps/desktop
+        run: |
+          npm install --package-lock-only --ignore-scripts
+          npm ci
+          npm run i18n:scan
+          npm run check
+
+      - name: Build ad-free macOS package
+        if: steps.upstream.outputs.should_build == 'true'
+        working-directory: apps/desktop
+        env:
+          APPLE_SIGNING_IDENTITY: "-"
+          CARGO_PROFILE_RELEASE_DEBUG: "1"
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: |
+          npm run tauri -- build \
+            --target aarch64-apple-darwin \
+            --bundles app,dmg \
+            --ci \
+            --config '{"bundle":{"createUpdaterArtifacts":false}}'
+
+      - name: Upload macOS package
+        if: steps.upstream.outputs.should_build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cursor-byok-adfree-macos-arm64-${{ steps.upstream.outputs.upstream_sha }}
+          path: target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Update fork main after successful build
+        if: steps.upstream.outputs.has_update == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OLD_SHA: ${{ steps.upstream.outputs.old_sha }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.upstream_sha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          tree=$(git write-tree)
+          commit=$(printf 'chore: sync upstream %s and preserve ad-free build\n' "${UPSTREAM_SHA:0:12}" | \
+            git commit-tree "${tree}" -p "${OLD_SHA}" -p "${UPSTREAM_SHA}")
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "${commit}:refs/heads/main"
+
+      - name: Record no-op run
+        if: steps.upstream.outputs.should_build != 'true'
+        run: echo "Upstream has not changed; no package was built."
