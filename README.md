@@ -1,3 +1,5 @@
+## 👋Is Cursor getting too heavy?  ✨ **New from the same author** → [Baocode](https://baocode.dev) — an awesome desktop GUI for Claude Code: polished, ultra-small, ultra-light.
+
 <div align="center">
 
 # cursor-byok
